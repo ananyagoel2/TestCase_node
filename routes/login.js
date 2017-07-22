@@ -2,7 +2,8 @@
  * Created by ananyagoel on 21/07/17.
  */
 
-var user_model = require('../models/model');
+var model = require('../models/model');
+var user_model = model.user;
 var jwt = require('../util/jwt_util');
 
 var config = require('../config');
@@ -39,13 +40,12 @@ router.route('/')
             })
     })
 
-router.route('/check_token')
+router.route('/posts')
     .get(function (req,res) {
 
         var temp = req.headers.authorization;
         var part = temp.split(' ');
         var decoded = jwt.decodeToken(part[1]);
-        console.log(decoded);
 
         try{
 
@@ -55,6 +55,18 @@ router.route('/check_token')
             console.log(err);
             return res.status(401).send(err);
         }
+
+        user_model.findById(decoded._id)
+            .populate('uploads')
+            .exec(function (err, user_data) {
+                if(err){
+                    res.status(400).send(err);
+                }
+                else{
+                    res.status(200).send(user_data)
+                }
+            })
+
     });
 
 module.exports = router;

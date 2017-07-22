@@ -26,9 +26,16 @@ var user_model = new schema({
     password:{
         type: String,
         select:false
-    }
+    },
+    uploads:
+        [
+            {
+                type:schema.ObjectId,
+                ref:'upload_schema'
+            }
+        ]
 
-})
+});
 
 
 user_model.pre('save', function(next) {
@@ -70,9 +77,54 @@ user_model.methods.compare_password = function(candidatePassword, cb) {
     });
 };
 
-user_model.index({email:1},{unique:true,sparse:true});
+var upload_schema = new schema({
+    created_at:
+        {
+            type: Date
+        },
+    updated_at:
+        {
+            type:Date
+        },
+    upload_url:
+        {
+            type:String,
+            unique:true
+        },
+    upload_type:
+        {
+            type:String,
+            default:'text'
+        },
+    upload_by_user:{
+        type:schema.ObjectId,
+        ref:'user'
+    }
+});
 
+// on every save, add the date
+upload_schema.pre('save', function(next) {
+    // get the current date
+    var currentDate = new Date();
+
+    // change the updated_at field to current date
+    this.updated_at = currentDate;
+
+    // if created_at doesn't exist, add to that field
+    if (!this.created_at)
+        this.created_at = currentDate;
+
+    next();
+});
+
+
+user_model.index({email:1},{unique:true,sparse:true});
+upload_schema.index({upload_url:1},{unique:true, sparse:true})
 
 var user = db.model('user', user_model);
+var upload_schema = db.model('upload_schema',upload_schema)
 
-module.exports= user;
+module.exports= {
+    user,
+    upload_schema
+};
