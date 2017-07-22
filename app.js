@@ -8,10 +8,11 @@ var jwt = require('express-jwt');
 var _ = require('lodash');
 
 
-
+var config = require('./config');
 var index = require('./routes/index');
 var users = require('./routes/users');
 var login = require('./routes/login');
+var upload = require('./routes/upload');
 
 var app = express();
 
@@ -34,9 +35,13 @@ app.use(function (req, res, next) {
     next();
 });
 
+// app.use(jwt({ secret: config.JWT_SECRET_KEY}).unless({path: ['/', '/login/']}));
+
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/login', login);
+app.use('/upload',upload);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
