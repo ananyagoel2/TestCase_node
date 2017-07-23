@@ -37,6 +37,7 @@ router.route('/')
                 res.send(result)
             }).catch(function (err) {
             console.log(err)
+            res.send({"error":err})
         })
 
     });
